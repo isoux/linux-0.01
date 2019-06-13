@@ -9,6 +9,9 @@ The kernel runs in both emulators: QEMU ver. 2.11.1 and Bochs ver 2.6. and that 
 I also uploaded the bochsrc.txt file so that the bochs runs from the command line from the root where the kernel(Image) is
 and qemu runs from the cmd line by the command: make run, but first unzip the file hd_oldlinux.img.zip.
 
+In this branch: workin-ver, I'll update new stuffs, actually stuffs compiled with new tools for compiling. At this moment you must have installed NASM assembler on your system.
+For fans of the authentic kernel as mr. Torvalds wrote it with the available tools for that time, I left the Master branch, which I will no longer update with new things. So  on this: workin-ver branch I'll update new things.
+
 Enjoy work and improvement.
 sincerely 
 Isoux
