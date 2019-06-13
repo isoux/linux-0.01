@@ -1,4 +1,4 @@
-2019.13.06:
+2019.06.13:
 	From this moment, I decided to overwrite all the files with the extension .s, that is the assembler 
 	files written with GAS syntax, with files for the NASM assembler & .asm extension. 
 	For now, I've just finishd the boot folder and added the Makefile in it.
