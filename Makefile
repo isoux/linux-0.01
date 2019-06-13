@@ -30,25 +30,26 @@ LIBS	=lib/lib.a
 
 all:	Image
 
-Image: boot/boot tools/system tools/build
-	objcopy  -O binary -R .note -R .comment tools/system tools/system.bin
-	tools/build boot/boot tools/system.bin > Image
-#	sync
-
-tools/build: tools/build.c
-	$(CC) $(CFLAGS) \
-	-o tools/build tools/build.c
-	#chmem +65000 tools/build
-
-boot/head.o: boot/head.s
-
+Image: boot/boot tools/system 
+	cat boot/boot > Image
+	cat tools/system.bin >> Image
+	
 tools/system:	boot/head.o init/main.o \
 		$(ARCHIVES) $(LIBS)
 	$(LD) $(LDFLAGS) boot/head.o init/main.o \
 	$(ARCHIVES) \
 	$(LIBS) \
 	-o tools/system > System.map
+	objcopy  -O binary -R .note -R .comment tools/system tools/system.bin
+	(echo -n "SYS_SIZE equ ";stat -c%s tools/system.bin \
+	| tr '\012' ' ') > boot/boot.inc
 	
+boot/boot:	boot/boot.asm tools/system
+	(cd boot; make boot)
+
+boot/head.o: boot/head.asm
+	(cd boot; make head.o)
+		
 kernel/kernel.o:
 	(cd kernel; make)
 
@@ -61,13 +62,6 @@ fs/fs.o:
 lib/lib.a:
 	(cd lib; make)
 
-boot/boot:	boot/boot.s tools/system
-	(echo -n "SYSSIZE = (";stat -c%s tools/system \
-		| tr '\012' ' '; echo "+ 15 ) / 16") > tmp.s	
-	cat boot/boot.s >> tmp.s
-	$(AS86) -o boot/boot.o tmp.s
-	rm -f tmp.s
-	$(LD86) -s -o boot/boot boot/boot.o
 	
 run:
 	qemu-system-i386 -drive format=raw,file=Image,index=0,if=floppy -boot a -hdb hd_oldlinux.img -m 8 -machine pc-0.10
@@ -77,7 +71,8 @@ dump:
 
 clean:
 	rm -f Image System.map tmp_make boot/boot core
-	rm -f init/*.o boot/*.o tools/system tools/build tools/system.bin
+	rm -f init/*.o boot/*.o tools/system tools/system.bin
+	(cd boot;make clean)
 	(cd mm;make clean)
 	(cd fs;make clean)
 	(cd kernel;make clean)
@@ -94,6 +89,7 @@ dep:
 	(cd fs; make dep)
 	(cd kernel; make dep)
 	(cd mm; make dep)
+
 
 ### Dependencies:
 init/main.o : init/main.c include/unistd.h include/sys/stat.h \
