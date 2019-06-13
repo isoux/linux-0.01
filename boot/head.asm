@@ -46,10 +46,10 @@ h1:
 	jz h1
 
 	mov eax,cr0				;check math chip
-	and eax,0x80000011	;Save PG,ET,PE
+	and eax,0x80000011		;Save PG,ET,PE
 	test eax,0x10
 	jnz h2					;ET is set - 387 is present
-	or eax,4					;else set emulate bit
+	or eax,4				;else set emulate bit
 h2:
 	mov cr0,eax
 	jmp after_page_tables
@@ -114,7 +114,7 @@ after_page_tables:
 	jmp setup_paging
 L6:
 	jmp L6				;main should never return here, but
-							;just in case, we know what happens.
+						;just in case, we know what happens.
 ;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ; This is the default interrupt "handler"
 
@@ -151,38 +151,38 @@ align 2
 setup_paging:
 	mov ecx,1024*3
 	xor eax,eax
-	xor edi,edi						;pg_dir is at 0x000
+	xor edi,edi					;pg_dir is at 0x000
 	cld
 	rep stosd
 	mov dword[pg_dir],pg0+7		;set present bit/user r/w 
 	mov dword[pg_dir+4],pg1+7	;--------- " " ---------
 	mov edi,pg1+4092
-	mov eax,0x7ff007				;8Mb - 4096 + 7 (r/w user,p)
+	mov eax,0x7ff007			;8Mb - 4096 + 7 (r/w user,p)
 	std
-j1: stosd							;fill pages backwards - more efficient :-
+j1: stosd						;fill pages backwards - more efficient :-
 	sub eax,0x1000
 	jnl j1
-	xor eax,eax						;pg_dir is at 0x0000
-	mov cr3,eax						;cr3 - page directory start
+	xor eax,eax					;pg_dir is at 0x0000
+	mov cr3,eax					;cr3 - page directory start
 	mov eax,cr0
 	or eax,0x80000000
-	mov cr0,eax						;set paging (PG) bit
-	ret								;this also flushes prefetch-queue
+	mov cr0,eax					;set paging (PG) bit
+	ret							;this also flushes prefetch-queue
 ;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 align 2
 dw 0
 
 idt_descr:
-	dw 256*8-1						;idt contains 256 entries
+	dw 256*8-1					;idt contains 256 entries
 	dd idt
 	
 align 2
 dw 0
 
 gdt_descr:
-	dw 256*8-1						;so does gdt (not that that's any
-	dd gdt							;magic number, but it works for me :^)
+	dw 256*8-1					;so does gdt (not that that's any
+	dd gdt						;magic number, but it works for me :^)
 
 align 8
 idt:	times 256*8 db 0		; idt is uninitialized
