@@ -1,3 +1,10 @@
+2019.13.06:
+	From this moment, I decided to overwrite all the files with the extension .s, that is the assembler files written with GAS syntax, with files for the NASM assembler & .asm extension. For now, I've just finishd the boot folder and added the Makefile in it.
+	The file tools/buil.c is no longer needed.
+For me, this is a great way to go through the entire kernel in an effort to porting the assemblef files in intel syntax, learning the basics of the kernel and getting the general picture how it works ... Аnd of course, the NASM syntax is much more understandable than GAS syntax.
+	In this branch: workin-ver, I'll update new stuffs, actually stuffs compiled with new tools for compiling. At this moment you must have installed NASM assembler on your system.
+For fans of the authentic kernel as mr. Torvalds wrote it with the available tools for that time, I left the Master branch, which I will no longer update with new things. So  on this: workin-ver branch I'll update new things.
+
 2019.05.05:
 	Finally, the problem with creating new files (with vim, echo and so on) is solved. 
 	Added one line of code to bitmap.c
