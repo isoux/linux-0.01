@@ -1,15 +1,17 @@
 CC	=gcc
 CFLAGS	=-Wall -O -std=gnu89 -fstrength-reduce  -fomit-frame-pointer -m32 \
 	-fno-stack-protector -finline-functions -nostdinc -fno-builtin -g -I../include
-AS	=as --32
+AS	= nasm -f elf32
 AR	=ar 
 LD	=ld -m  elf_i386 
 CPP	=gcc -E -nostdinc -I../include
 
+.SUFFIXES: .asm 
+
 .c.o:
 	$(CC) $(CFLAGS) \
 	-c -o $*.o $<
-.s.o:
+.asm.o:
 	$(AS) -o $*.o $<
 .c.s:
 	$(CC) $(CFLAGS) \
@@ -35,3 +37,5 @@ dep:
 memory.o : memory.c ../include/signal.h ../include/sys/types.h \
   ../include/linux/config.h ../include/linux/head.h ../include/linux/kernel.h \
   ../include/asm/system.h 
+  
+page.o : page.asm
