@@ -4,11 +4,7 @@
 # remove them from the CFLAGS defines.
 #
 
-AS86	=as86 -0 
-CC86	=cc86 -0
-LD86	=ld86 -0
-
-AS	=as --32 
+#AS	=as --32 
 LD	=ld -m  elf_i386 
 LDFLAGS	=-M -Ttext 0 -e startup_32
 #LDFLAGS	=-s -x -M -Ttext 0 -e startup_32
