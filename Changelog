@@ -1,3 +1,7 @@
+2019.06.20:
+	The job with rewriting the assembler files (from GAS to NASM) is over.
+	Everything works fine.
+
 2019.06.13:
 	From this moment, I decided to overwrite all the files with the extension .s, that is the assembler 
 	files written with GAS syntax, with files for the NASM assembler & .asm extension. 
