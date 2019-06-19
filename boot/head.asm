@@ -6,7 +6,8 @@
 ; the page directory.
 ;
 ; 11.jun.2019
-; Code is rewritten from head.s (GAS) to head.asm (NASM intel syntax) by ISOUX
+; Code is rewritten from head.s (GAS) to head.asm 
+; (NASM intel syntax) by ISOUX
 
 USE32
 CPU 486
@@ -39,18 +40,18 @@ startup_32:
 	mov gs,ax
 	lss esp,[stack_start]
 	xor eax,eax
-h1:
+.1:
 	inc eax					;check that A20 really IS enabled
 	mov [0],eax
 	cmp [0x100000],eax
-	jz h1
+	jz .1
 
 	mov eax,cr0				;check math chip
-	and eax,0x80000011		;Save PG,ET,PE
+	and eax,0x80000011	;Save PG,ET,PE
 	test eax,0x10
-	jnz h2					;ET is set - 387 is present
-	or eax,4				;else set emulate bit
-h2:
+	jnz .2					;ET is set - 387 is present
+	or eax,4					;else set emulate bit
+.2:
 	mov cr0,eax
 	jmp after_page_tables
 ;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

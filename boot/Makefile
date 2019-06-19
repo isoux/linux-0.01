@@ -15,3 +15,4 @@ head.o: head.asm
 clean:
 	rm -f boot.inc
 	
+boot: boot.inc
