@@ -7,7 +7,7 @@
 #
 
 AR	=ar
-AS	=as --32
+AS	=nasm -f elf32
 LD	=ld -m  elf_i386 
 LDFLAGS	=-g #-s -x
 CC	=gcc
@@ -15,14 +15,13 @@ CFLAGS	=-Wall -O -std=gnu89 -fstrength-reduce -fomit-frame-pointer -m32 \
 	-finline-functions -fno-stack-protector -nostdinc -fno-builtin -g -I../include
 CPP	=gcc -E -nostdinc -I../include
 
-.c.s:
-	$(CC) $(CFLAGS) \
-	-S -o $*.s $<
-.s.o:
-	$(AS) -o $*.o $<
+.SUFFIXES: .asm 
+
 .c.o:
 	$(CC) $(CFLAGS) \
 	-c -o $*.o $<
+.asm.o:
+	$(AS) -o $*.o $<
 
 OBJS  = sched.o system_call.o traps.o asm.o fork.o \
 	panic.o printk.o vsprintf.o tty_io.o console.o \
