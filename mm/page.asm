@@ -2,9 +2,14 @@
 ; he real work is done in mm.c
 ;
 ; 14.jun.2019
-; Code is rewritten from page.s (GAS) to page.asm (NASM intel syntax) by ISOUX
+; Code is rewritten from page.s (GAS) to page.asm
+; (NASM intel syntax) by ISOUX
+
+USE32
+CPU 486
 
 global page_fault
+
 extern do_no_page, do_wp_page
 
 page_fault:
@@ -33,4 +38,5 @@ page_fault:
 		pop    edx
 		pop    ecx
 		pop    eax
-		iret   
+		iret
+

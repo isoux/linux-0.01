@@ -1,7 +1,9 @@
+# Makefile for mm
+
 CC	=gcc
 CFLAGS	=-Wall -O -std=gnu89 -fstrength-reduce  -fomit-frame-pointer -m32 \
 	-fno-stack-protector -finline-functions -nostdinc -fno-builtin -g -I../include
-AS	= nasm -f elf32
+AS	=nasm -f elf32
 AR	=ar 
 LD	=ld -m  elf_i386 
 CPP	=gcc -E -nostdinc -I../include
@@ -13,9 +15,6 @@ CPP	=gcc -E -nostdinc -I../include
 	-c -o $*.o $<
 .asm.o:
 	$(AS) -o $*.o $<
-.c.s:
-	$(CC) $(CFLAGS) \
-	-S -o $*.s $<
 
 OBJS	= memory.o page.o
 
