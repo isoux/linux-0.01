@@ -14,10 +14,17 @@
  * interrupts. We know interrupts aren't enabled when getting a keyboard
  * interrupt, as we use trap-gates. Hopefully all is well.
  */
+ 
+/* 1.jul.2019. by ISOUX
+ * The code has been rebuilt by introducing an inline assembler functions 
+ * ( they all start with the prefix asm )written in the intel syntax. 
+ * The file is compiling with clang (LLVM).
+ */
 
 #include <linux/sched.h>
 #include <linux/tty.h>
-#include <asm/io.h>
+#include <asm/gas_regs.h>
+//#include <asm/io.h>
 #include <asm/system.h>
 
 #define SCREEN_START 0xb8000
@@ -25,6 +32,9 @@
 #define LINES 25
 #define COLUMNS 80
 #define NPAR 16
+
+#define SPACE_ATTR 0x0720
+#define SPACE_ATTR_X2 0x07200720
 
 extern void keyboard_interrupt(void);
 
@@ -45,6 +55,48 @@ unsigned char attr=0x07;
  */
 #define RESPONSE "\033[?1;2c"
 
+/* Folows static inline assembler functions 
+ *	This intel sintax is posible because of 
+ *	using LLVM clang compiler 
+ */
+
+static inline void asm_scrup_1(void) {
+__asm{	mov ax, (SPACE_ATTR)
+			cld
+			rep movsd dword ptr es:[edi], dword ptr[esi]
+			mov ecx,edx
+			rep stosw }
+}
+
+static inline void asm_scrup_2(void) {
+__asm{	mov eax, (SPACE_ATTR_X2)
+			cld 
+			rep stosd }	
+} 
+
+static inline void asm_scrdown(void) {
+__asm{	mov ax,(SPACE_ATTR)
+			std
+			rep movsd dword ptr es:[edi], dword ptr[esi]
+			add edi,2
+			mov ecx,edx
+			rep stosw }
+} 
+
+static inline void asm_erease() {
+__asm{	mov ax,(SPACE_ATTR)
+			cld
+			rep	stosw }
+}
+
+static inline void asm_char_write(unsigned char c) {
+__asm{	mov al, byte ptr [c]
+			mov edx,[pos]
+			mov ah, byte ptr [attr] /* mov ah,byte ptr SPACE_ATTR */
+			mov word ptr[edx],ax }
+}
+/* End of static inline asemmbler functions */
+
 static inline void gotoxy(unsigned int new_x,unsigned int new_y)
 {
 	if (new_x>=columns || new_y>=lines)
@@ -56,12 +108,12 @@ static inline void gotoxy(unsigned int new_x,unsigned int new_y)
 
 static inline void set_origin(void)
 {
-	cli();
+	_cli();
 	outb_p(12,0x3d4);
 	outb_p(0xff&((origin-SCREEN_START)>>9),0x3d5);
 	outb_p(13,0x3d4);
 	outb_p(0xff&((origin-SCREEN_START)>>1),0x3d5);
-	sti();
+	_sti();
 }
 
 static void scrup(void)
@@ -70,73 +122,37 @@ static void scrup(void)
 		origin += columns<<1;
 		pos += columns<<1;
 		scr_end += columns<<1;
-		if (scr_end>SCREEN_END) {
-			
-			int d0,d1,d2,d3;
-			__asm__ __volatile("cld\n\t"
-				"rep\n\t"
-				"movsl\n\t"
-				"movl %[columns],%1\n\t"
-				"rep\n\t"
-				"stosw"
-				:"=&a" (d0), "=&c" (d1), "=&D" (d2), "=&S" (d3)
-				:"0" (0x0720),
-				 "1" ((lines-1)*columns>>1),
-				 "2" (SCREEN_START),
-				 "3" (origin),
-				 [columns] "r" (columns)
-				:"memory");
-
+		if (scr_end>SCREEN_END) {	
+			_edx(columns);
+			_ecx((lines-1)*columns>>1);
+			_edi(SCREEN_START);
+			_esi(origin);
+			asm_scrup_1(); 
 			scr_end -= origin-SCREEN_START;
 			pos -= origin-SCREEN_START;
 			origin = SCREEN_START;
 		} else {
-			int d0,d1,d2;
-			__asm__ __volatile("cld\n\t"
-				"rep\n\t"
-				"stosl"
-				:"=&a" (d0), "=&c" (d1), "=&D" (d2) 
-				:"0" (0x07200720),
-				"1" (columns>>1),
-				"2" (scr_end-(columns<<1))
-				:"memory");
+					_ecx(columns>>1);
+					_edi(scr_end-(columns<<1));
+					asm_scrup_2();
 		}
 		set_origin();
 	} else {
-		int d0,d1,d2,d3;
-		__asm__ __volatile__("cld\n\t"
-			"rep\n\t"
-			"movsl\n\t"
-			"movl %[columns],%%ecx\n\t"
-			"rep\n\t"
-			"stosw"
-			:"=&a" (d0), "=&c" (d1), "=&D" (d2), "=&S" (d3)
-			:"0" (0x0720),
-			"1" ((bottom-top-1)*columns>>1),
-			"2" (origin+(columns<<1)*top),
-			"3" (origin+(columns<<1)*(top+1)),
-			[columns] "r" (columns)
-			:"memory");
+				_edx(columns);
+				_ecx((bottom-top-1)*columns>>1);
+				_edi(origin+(columns<<1)*top);
+				_esi(origin+(columns<<1)*(top+1));
+				asm_scrup_1();
 	}
 }
 
 static void scrdown(void)
 {
-	int d0,d1,d2,d3;
-	__asm__ __volatile__("std\n\t"
-		"rep\n\t"
-		"movsl\n\t"
-		"addl $2,%%edi\n\t"	/* %edi has been decremented by 4 */
-		"movl %[columns],%%ecx\n\t"
-		"rep\n\t"
-		"stosw"
-		:"=&a" (d0), "=&c" (d1), "=&D" (d2), "=&S" (d3)
-		:"0" (0x0720),
-		"1" ((bottom-top-1)*columns>>1),
-		"2" (origin+(columns<<1)*bottom-4),
-		"3" (origin+(columns<<1)*(bottom-1)-4),
-		[columns] "r" (columns)
-		:"memory");
+	_edx(columns);
+	_ecx((bottom-top-1)*columns>>1);
+	_edi(origin+(columns<<1)*bottom-4);
+	_esi(origin+(columns<<1)*(bottom-1)-4);
+	asm_scrdown();
 }
 
 static void lf(void)
@@ -170,7 +186,7 @@ static void del(void)
 	if (x) {
 		pos -= 2;
 		x--;
-		*(unsigned short *)pos = 0x0720;
+		*(unsigned short *)pos = SPACE_ATTR;
 	}
 }
 
@@ -195,13 +211,9 @@ static void csi_J(int par)
 		default:
 			return;
 	}
-	int d0,d1,d2;
-	__asm__ __volatile__("cld\n\t"
-		"rep\n\t"
-		"stosw\n\t"
-		:"=&c" (d0), "=&D" (d1), "=&a" (d2)
-		:"0" (count),"1" (start),"2" (0x0720)
-		:"memory");
+	_ecx(count);
+	_edi(start);
+	asm_erease();
 }
 
 static void csi_K(int par)
@@ -227,13 +239,9 @@ static void csi_K(int par)
 		default:
 			return;
 	}
-	int d0,d1,d2;
-	__asm__ __volatile__("cld\n\t"
-		"rep\n\t"
-		"stosw\n\t"
-		:"=&c" (d0), "=&D" (d1), "=&a" (d2)
-		:"0" (count),"1" (start),"2" (0x0720)
-		:"memory");
+	_ecx(count);
+	_edi(start);
+	asm_erease();
 }
 
 void csi_m(void)
@@ -252,31 +260,31 @@ void csi_m(void)
 
 static inline void set_cursor(void)
 {
-	cli();
+	_cli();
 	outb_p(14,0x3d4);
 	outb_p(0xff&((pos-SCREEN_START)>>9),0x3d5);
 	outb_p(15,0x3d4);
 	outb_p(0xff&((pos-SCREEN_START)>>1),0x3d5);
-	sti();
+	_sti();
 }
 
 static void respond(struct tty_struct * tty)
 {
 	char * p = RESPONSE;
 
-	cli();
+	_cli();
 	while (*p) {
 		PUTCH(*p,tty->read_q);
 		p++;
 	}
-	sti();
+	_sti();
 	copy_to_cooked(tty);
 }
 
 static void insert_char(void)
 {
 	int i=x;
-	unsigned short tmp,old=0x0720;
+	unsigned short tmp,old=SPACE_ATTR;
 	unsigned short * p = (unsigned short *) pos;
 
 	while (i++<columns) {
@@ -312,7 +320,7 @@ static void delete_char(void)
 		*p = *(p+1);
 		p++;
 	}
-	*p=0x0720;
+	*p=SPACE_ATTR;
 }
 
 static void delete_line(void)
@@ -400,10 +408,7 @@ void con_write(struct tty_struct * tty)
 						pos -= columns<<1;
 						lf();
 					}
-					__asm__("movb attr,%%ah\n\t"
-						"movw %%ax,%1\n\t"
-						::"a" (c),"m" (*(short *)pos)
-						/*:"ax"*/);
+					asm_char_write(c);
 					pos += 2;
 					x++;
 				} else if (c==27)

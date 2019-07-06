@@ -1,3 +1,13 @@
+2019.07.06:
+	New challenge: All c files (or most) to do compile with LLVM Clang. 
+	Also, all inline assembler functions within c code to do rewrite by intel syntax while retaining 
+	minimal unavoidable needs for GAS syntax, especially in header files where macro functions 
+	are defined in GAS syntax. Proof for this is provided by only some files in the kernel folder 
+	that are so edited for now (they have a *.llo suffix after compilation), and the most important 
+	is the console.c file that among other files, includes <asm/gas_regs.h> a new file 
+	(a replacement for <asm/io.h>) in which I try to introduce a much more intelligible syntax 
+	with the help of an unavoidable GAS syntax. After all, see the code :-)
+
 2019.06.20:
 	The job with rewriting the assembler files (from GAS to NASM) is over.
 	Everything works fine.
@@ -6,14 +16,14 @@
 	From this moment, I decided to overwrite all the files with the extension .s, that is the assembler 
 	files written with GAS syntax, with files for the NASM assembler & .asm extension. 
 	For now, I've just finishd the boot folder and added the Makefile in it.
-	The file tools/buil.c is no longer needed.
+	The file tools/buil.c is no longer needed. Also a AS86 & LD86 tools is no longer needed.
 	For me, this is a great way to go through the entire kernel in an effort to porting the assemblef files 
 	in intel syntax, learning the basics of the kernel and getting the general picture how it works ... 
 	Аnd of course, the NASM syntax is much more understandable than GAS syntax.
-	In this branch: workin-ver, I'll update new stuffs, actually stuffs compiled with new tools for compiling. 
+	In this branch: working-ver, I'll update new stuffs, actually stuffs compiled with new tools for compiling. 
 	At this moment you must have installed NASM assembler on your system.
 	For fans of the authentic kernel as mr. Torvalds wrote it with the available tools for that time, I left the Master 
-	branch, which I will no longer update with new things. So  on this: workin-ver branch I'll update new things.
+	branch, which I will no longer update with new things. So  on this: working-ver branch I'll update new things.
 
 2019.05.05:
 	Finally, the problem with creating new files (with vim, echo and so on) is solved. 

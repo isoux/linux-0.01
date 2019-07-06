@@ -10,30 +10,47 @@ AR	=ar
 AS	=nasm -f elf32
 LD	=ld -m  elf_i386 
 LDFLAGS	=-g #-s -x
+CLANG=clang
 CC	=gcc
 CFLAGS	=-Wall -O -std=gnu89 -fstrength-reduce -fomit-frame-pointer -m32 \
 	-finline-functions -fno-stack-protector -nostdinc -fno-builtin -g -I../include
 CPP	=gcc -E -nostdinc -I../include
 
-.SUFFIXES: .asm 
+CLANG_FLAGS = -Wall -std=gnu89  -fomit-frame-pointer -m32 -finline-functions \
+		-fno-stack-protector -nostdinc -g -I../include -fasm-blocks \
+		-masm=intel  -fasm
+		
+OPTIM_FLAF = -O
+
+
+.SUFFIXES: .asm .llo
 
 .c.o:
 	$(CC) $(CFLAGS) \
 	-c -o $*.o $<
 .asm.o:
 	$(AS) -o $*.o $<
+.c.llo:
+	$(CLANG) $(CLANG_FLAGS) $(OPTIM_FLAF) \
+	-c -o $*.llo $<
 
-OBJS  = sched.o system_call.o traps.o asm.o fork.o \
-	panic.o printk.o vsprintf.o tty_io.o console.o \
-	keyboard.o rs_io.o hd.o sys.o exit.o serial.o \
+OBJS  = system_call.o traps.o asm.o fork.o \
+	panic.o printk.o vsprintf.o tty_io.o console.llo \
+	keyboard.o rs_io.o hd.llo sys.o exit.o serial.llo \
 	mktime.o
+	
+SCHED = sched.llo
 
-kernel.o: $(OBJS)
-	$(LD) -r -o kernel.o $(OBJS)
+kernel.o: $(SCHED) $(OBJS)
+	$(LD) -r -o kernel.o $(SCHED) $(OBJS)
 	sync
+	
+sched.llo: sched.c
+	$(CLANG) $(CLANG_FLAGS) \
+	-c -o $*.llo $<
 
 clean:
-	rm -f core *.o *.a tmp_make
+	rm -f core *.o *.a *.llo tmp_make
 	for i in *.c;do rm -f `basename $$i .c`.s;done
 
 dep:

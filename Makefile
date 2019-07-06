@@ -9,11 +9,19 @@ LD	=ld -m  elf_i386
 LDFLAGS	=-M -Ttext 0 -e startup_32
 #LDFLAGS	=-s -x -M -Ttext 0 -e startup_32
 CC	=gcc
-CFLAGS	=-Wall -O -std=gnu89 -fstrength-reduce -fomit-frame-pointer -fno-stack-protector -fno-builtin -g -m32
+CLANG=clang
+CFLAGS	=-Wall -O -std=gnu89 -fstrength-reduce -fomit-frame-pointer \
+		-fno-stack-protector -fno-builtin -g -m32
 CPP	=gcc -E -nostdinc -Iinclude
+
+CLANG_FLAGS = -Wall -O -std=gnu89  -fomit-frame-pointer -m32 -finline-functions \
+		-fno-stack-protector -nostdinc -g -I../include -fasm-blocks \
+		-masm=intel  -fasm
 
 ARCHIVES=kernel/kernel.o mm/mm.o fs/fs.o
 LIBS	=lib/lib.a
+
+.SUFFIXES: .asm .llo
 
 .c.s:
 	$(CC) $(CFLAGS) \
@@ -23,6 +31,9 @@ LIBS	=lib/lib.a
 .c.o:
 	$(CC) $(CFLAGS) \
 	-nostdinc -Iinclude -c -o $*.o $<
+.c.llo:
+	$(CLANG) $(CLANG_FLAGS) \
+	-c -o $*.llo $<
 
 all:	Image
 

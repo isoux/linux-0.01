@@ -1,4 +1,4 @@
-/*
+/* 
  * 'sched.c' is the main kernel file. It contains scheduling primitives
  * (sleep_on, wakeup, schedule etc) as well as a number of simple system
  * call functions (type getpid(), which just extracts a field from
@@ -9,7 +9,8 @@
 #include <signal.h>
 #include <linux/sys.h>
 #include <asm/system.h>
-#include <asm/io.h>
+#include <asm/gas_regs.h>
+//#include <asm/io.h>
 #include <asm/segment.h>
 
 #define LATCH (1193180/HZ)
@@ -249,6 +250,6 @@ void sched_init(void)
 	outb_p(LATCH & 0xff , 0x40);	/* LSB */
 	outb(LATCH >> 8 , 0x40);	/* MSB */
 	set_intr_gate(0x20,&timer_interrupt);
-	outb(inb_p(0x21)&~0x01,0x21);
+   outb(inb_p(0x21)&~0x01,0x21);
 	set_system_gate(0x80,&system_call);
 }

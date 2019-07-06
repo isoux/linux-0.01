@@ -4,10 +4,11 @@
 #include <linux/kernel.h>
 #include <linux/hdreg.h>
 #include <asm/system.h>
-#include <asm/io.h>
+#include <asm/gas_regs.h>
+//#include <asm/io.h>
 #include <asm/segment.h>
 
-/*
+/* Uspelo sa Clang 23.6.2019
  * This code handles all hd-interrupts, and read/write requests to
  * the hard-disk. It is relatively straigthforward (not obvious maybe,
  * but interrupts never are), while still being efficient, and never

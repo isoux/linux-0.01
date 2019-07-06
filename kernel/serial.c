@@ -10,7 +10,8 @@
 #include <linux/tty.h>
 #include <linux/sched.h>
 #include <asm/system.h>
-#include <asm/io.h>
+#include <asm/gas_regs.h>
+//#include <asm/io.h>
 
 #define WAKEUP_CHARS (TTY_BUF_SIZE/4)
 
