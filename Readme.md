@@ -1,4 +1,4 @@
-linux-0.01 On Ubuntu 18.04 with GCC-7.3 & NASM assembler
+linux-0.01 On Ubuntu 18.04 with GCC-7.3, NASM assembler & LLVM Clang
 
 First of all, thanks Mariuz!
 
@@ -8,6 +8,7 @@ The kernel runs in both emulators: QEMU ver. 2.11.1 and Bochs ver 2.6. and that 
 
 I also uploaded the bochsrc.txt file so that the bochs runs from the command line from the root where the kernel(Image) is and qemu runs from the cmd line by the command: make run, but first unzip the file hd_oldlinux.img.zip.
 
-In this branch: working-ver, I'll update new stuffs, actually stuffs compiled with new tools for compiling. At this moment you must have installed NASM assembler on your system. For fans of the authentic kernel as mr. Torvalds wrote it with the available tools for that time, I left the Master branch, which I will no longer update with new things. So on this: working-ver branch I'll update new things.
+In this branch: working-ver, I'll update new stuffs, actually stuffs compiled with new tools for compiling. At this moment you must have installed NASM assembler & LLVM's Clang compiler on your system. For fans of the authentic kernel as mr. Torvalds wrote it with the available tools for that time, I left the Master branch, which I will no longer update with new things. So on this: working-ver branch I'll update new things.
 
-Enjoy work and improvement. sincerely Isoux
+Enjoy work and improvement. 
+sincerely Isoux.
