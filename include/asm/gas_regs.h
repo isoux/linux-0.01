@@ -9,7 +9,7 @@
  * (value): for example, if the type of value is (char) then the
  * expresion _eax(c); = mov al,c but _eax((long) c) = mov eax,c.
  *
- * Here the mixed Intel & Gas sintax, is posible at same time by using
+ * Here the mixed Intel & Gas syntax, is posible at same time by using
  * the LLVM's Clang compiler.
  */
 
@@ -44,7 +44,7 @@
 
 
 /* For now here folows a chaged <asm/io.h> file with introducing
- * the new policy of using mixed assembler sintax, with goal
+ * the new policy of using mixed assembler syntax, with goal
  * to be more understanding & readable, I hope :-)
  */
 #define inb(port) ({		\
